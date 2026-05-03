@@ -3,7 +3,7 @@ import numpy as np
 from PIL import Image
 
 from preprocessor import preprocess
-from detector import analyse
+from detector import analyse, _get_deepface
 from visualizer import emotion_bar_chart, race_bar_chart, annotate_face
 
 
@@ -13,6 +13,9 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed"
 )
+
+# ── PRE-LOAD MODELS ON STARTUP ─────────────────────────
+_get_deepface()
 
 # ── CLEAN UI ─────────────────────────────────────────────
 st.markdown("""
@@ -27,21 +30,18 @@ html, body, [class*="css"] {
 
 .stApp { background-color: #0f0f10; }
 
-/* Title */
 .hero-title {
     font-size: 2.4rem;
     font-weight: 600;
     color: #ffffff;
 }
 
-/* Subtitle */
 .hero-sub {
     font-size: 0.95rem;
     color: #8a8a8a;
     margin-bottom: 1rem;
 }
 
-/* Cards */
 .result-card {
     background: #1a1a1c;
     border: 1px solid #2a2a2d;
@@ -49,21 +49,18 @@ html, body, [class*="css"] {
     padding: 1.5rem;
 }
 
-/* Labels */
 .attr-label {
     font-size: 0.7rem;
     text-transform: uppercase;
     color: #7a7a7a;
 }
 
-/* Values */
 .attr-value {
     font-family: 'JetBrains Mono', monospace;
     font-size: 1.4rem;
     color: white;
 }
 
-/* Chips */
 .badge {
     display: inline-block;
     padding: 0.25rem 0.7rem;
@@ -74,14 +71,12 @@ html, body, [class*="css"] {
     margin-right: 5px;
 }
 
-/* Upload */
 [data-testid="stFileUploadDropzone"] {
     background: #1a1a1c !important;
     border: 1px dashed #333 !important;
     border-radius: 12px !important;
 }
 
-/* Footer */
 .footer-tag {
     font-size: 0.7rem;
     color: #555;
@@ -103,13 +98,17 @@ with col_input:
     image = None
 
     with tab_upload:
-        uploaded = st.file_uploader("Upload image", type=["jpg","jpeg","png","webp"], label_visibility="collapsed")
+        uploaded = st.file_uploader(
+            "Upload image",
+            type=["jpg", "jpeg", "png", "webp"],
+            label_visibility="collapsed"
+        )
         if uploaded:
             image = Image.open(uploaded).convert("RGB")
             st.image(image, use_container_width=True)
 
     with tab_camera:
-        camera_photo = st.camera_input("", label_visibility="collapsed")
+        camera_photo = st.camera_input("Take a photo", label_visibility="collapsed")
         if camera_photo:
             image = Image.open(camera_photo).convert("RGB")
 
@@ -136,7 +135,6 @@ with col_results:
                     )
                     st.image(annotated, use_container_width=True)
 
-                    # ── MAIN CARD ─────────────────
                     st.markdown(f"""
                     <div class="result-card">
                         <div style="display:flex;justify-content:space-between;">
@@ -162,14 +160,12 @@ with col_results:
                     </div>
                     """, unsafe_allow_html=True)
 
-                    # ── EMOTIONS ─────────────────
                     if result['emotions']:
-                        st.markdown("Emotion Distribution")
+                        st.markdown("**Emotion Distribution**")
                         st.image(emotion_bar_chart(result['emotions']), use_container_width=True)
 
-                    # ── RACE ─────────────────
                     if result['race_scores']:
-                        st.markdown("Ethnicity Confidence")
+                        st.markdown("**Ethnicity Confidence**")
                         st.image(race_bar_chart(result['race_scores']), use_container_width=True)
 
                 except Exception as e:
@@ -184,6 +180,6 @@ with col_results:
 
 # ── FOOTER ─────────────────────────────────────────────
 st.markdown(
-    '<div class="footer-tag">FaceIQ · DeepFace Pipeline</div>',
+    '<div class="footer-tag">FaceEQ · DeepFace Pipeline</div>',
     unsafe_allow_html=True
 )
