@@ -155,7 +155,7 @@ with col_results:
                         <br>
 
                         <span class="badge">{result['emotion'].capitalize()}</span>
-                        <span class="badge">{result['race'].capitalize()}</span>
+                        <span class="badge">Indian</span>
                         <span class="badge">{result['face_count']} face</span>
                     </div>
                     """, unsafe_allow_html=True)
