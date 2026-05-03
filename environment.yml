@@ -1,0 +1,15 @@
+name: faceeq
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+    - deepface
+    - tf-keras
+    - streamlit
+    - pillow
+    - numpy
+    - matplotlib
+    
