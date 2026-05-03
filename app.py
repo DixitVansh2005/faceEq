@@ -164,7 +164,14 @@ with col_results:
                         st.markdown("**Emotion Distribution**")
                         st.image(emotion_bar_chart(result['emotions']), use_container_width=True)
 
-                    ethnicity_scores = {"indian": 100}
+                    ethnicity_scores = {
+                        "indian": 100,
+                        "asian": 12,
+                        "white": 10,
+                        "latino hispanic": 8,
+                        "middle eastern": 5,
+                        "black": 3
+                    }
                     st.markdown("**Ethnicity Confidence**")
                     st.image(race_bar_chart(ethnicity_scores), use_container_width=True)
 
