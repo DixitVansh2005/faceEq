@@ -2,58 +2,39 @@
 detector.py
 -----------
 Core facial attribute analysis module.
-Wraps DeepFace to run age, gender, emotion and race prediction
-on a preprocessed numpy image array.
-
-Models used internally by DeepFace:
-  - Age/Gender : VGG-Face backbone trained on VGGFace2 dataset
-  - Emotion    : Mini-Xception trained on FER-2013 dataset
-  - Race       : VGG-16 trained on UTKFace dataset
-  - Detector   : RetinaFace (most accurate, default)
 """
 
 import numpy as np
 import time
+import streamlit as st
 
 
-# Which attributes to analyse — change this list to run fewer models
 ANALYSIS_ACTIONS = ['age', 'gender', 'emotion', 'race']
-
-# DeepFace face detector backend
-# Options: 'retinaface', 'mtcnn', 'opencv', 'mediapipe'
-# retinaface = most accurate, slightly slower
-DETECTOR_BACKEND = 'retinaface'
+DETECTOR_BACKEND = 'opencv'  # lightweight, no extra download, fine for most photos
 
 
-def _load_deepface():
-    """Lazy import so app starts fast before first analysis."""
+@st.cache_resource(show_spinner="Loading models...")
+def _get_deepface():
+    """Load DeepFace once and cache in memory across reruns."""
     from deepface import DeepFace
+    # Warm up the models so first analysis isn't slow
+    import numpy as np
+    dummy = np.zeros((100, 100, 3), dtype=np.uint8)
+    try:
+        DeepFace.analyze(
+            img_path=dummy,
+            actions=ANALYSIS_ACTIONS,
+            detector_backend=DETECTOR_BACKEND,
+            enforce_detection=False,
+            silent=True
+        )
+    except Exception:
+        pass
     return DeepFace
 
 
 def analyse(img_array: np.ndarray) -> dict:
-    """
-    Run full facial attribute analysis on a preprocessed image array.
-
-    Parameters
-    ----------
-    img_array : np.ndarray
-        RGB image as numpy array, shape (H, W, 3), uint8.
-
-    Returns
-    -------
-    dict with keys:
-        age          : int   — estimated age in years
-        gender       : str   — 'Man' or 'Woman'
-        gender_conf  : float — confidence % for predicted gender
-        emotion      : str   — dominant emotion label
-        emotions     : dict  — all emotions with % scores
-        race         : str   — dominant ethnicity label
-        race_scores  : dict  — all ethnicities with % scores
-        inference_ms : float — time taken in milliseconds
-        face_count   : int   — number of faces detected
-    """
-    DeepFace = _load_deepface()
+    DeepFace = _get_deepface()
 
     t0 = time.time()
 
@@ -67,14 +48,10 @@ def analyse(img_array: np.ndarray) -> dict:
 
     elapsed_ms = (time.time() - t0) * 1000
 
-    # DeepFace returns a list (one entry per detected face)
     faces = raw if isinstance(raw, list) else [raw]
     face_count = len(faces)
-
-    # Use the first (most prominent) face
     r = faces[0]
 
-    # Normalise gender field — older DeepFace versions return dict, newer return str
     gender_raw = r.get('dominant_gender', r.get('gender', 'Unknown'))
     if isinstance(gender_raw, dict):
         gender_label = max(gender_raw, key=gender_raw.get)
@@ -98,12 +75,7 @@ def analyse(img_array: np.ndarray) -> dict:
 
 
 def analyse_multi(img_array: np.ndarray) -> list[dict]:
-    """
-    Run analysis on ALL detected faces in the image.
-    Returns a list of result dicts (one per face).
-    Useful when multiple people are in the frame.
-    """
-    DeepFace = _load_deepface()
+    DeepFace = _get_deepface()
 
     raw = DeepFace.analyze(
         img_path=img_array,
