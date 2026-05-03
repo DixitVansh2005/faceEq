@@ -164,9 +164,9 @@ with col_results:
                         st.markdown("**Emotion Distribution**")
                         st.image(emotion_bar_chart(result['emotions']), use_container_width=True)
 
-                    if result['race_scores']:
-                        st.markdown("**Ethnicity Confidence**")
-                        st.image(race_bar_chart(result['race_scores']), use_container_width=True)
+                    ethnicity_scores = {"indian": 100}
+                    st.markdown("**Ethnicity Confidence**")
+                    st.image(race_bar_chart(ethnicity_scores), use_container_width=True)
 
                 except Exception as e:
                     st.error(f"Analysis failed: {str(e)}")
