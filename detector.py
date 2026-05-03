@@ -9,7 +9,7 @@ import time
 import streamlit as st
 
 
-ANALYSIS_ACTIONS = ['age', 'gender', 'emotion', 'race']
+ANALYSIS_ACTIONS = ['emotion']
 DETECTOR_BACKEND = 'opencv'  # lightweight, no extra download, fine for most photos
 
 
