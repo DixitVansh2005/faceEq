@@ -1,0 +1,8 @@
+deepface
+tf-keras
+streamlit
+pillow
+numpy
+matplotlib
+
+
