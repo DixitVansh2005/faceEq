@@ -170,7 +170,7 @@ with col_results:
                         "white": 10,
                         "latino hispanic": 8,
                         "middle eastern": 5,
-                        "black": 3
+                        "black": 25
                     }
                     st.markdown("**Ethnicity Confidence**")
                     st.image(race_bar_chart(ethnicity_scores), use_container_width=True)
